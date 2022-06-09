@@ -1,56 +1,111 @@
+import { format, formatDistanceToNow } from "date-fns";
+import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { Comment } from "./Comment";
 import styles from "./Post.module.css";
 
-export function Post() {
+export function Post({ author, content, publishedAt }) {
+  const [comments, setComments] = useState(["Really cool post"]);
+  const [newCommentText, setNewCommentText] = useState("");
+
+  const publishedDataFormatted = format(
+    publishedAt,
+    "d 'of' LLLL 'at' HH:mm'h'"
+  );
+
+  const publishedDateRelativeToNew = formatDistanceToNow(publishedAt, {
+    addSuffix: true,
+  });
+
+  function handleNewCommentChanged() {
+    event.target.setCustomValidity("");
+
+    setNewCommentText(event.target.value);
+  }
+
+  function handleCreateNewComment() {
+    event.preventDefault();
+
+    setComments([...comments, newCommentText]);
+    setNewCommentText("");
+  }
+
+  function onDeleteComment(commentToDelete) {
+    const commentsWithoutDeleteOne = comments.filter((comment) => {
+      return comment !== commentToDelete;
+    });
+
+    setComments(commentsWithoutDeleteOne);
+  }
+
+  function handleNewCommentInvalid() {
+    event.target.setCustomValidity("Write something to comment");
+  }
+
+  const isNewCommentEmpty = newCommentText.length === 0;
+
   return (
     <article className={styles.post}>
       <header>
         <div className={styles.author}>
-          <Avatar src={"https://www.github.com/diogom14.png"} />
+          <Avatar src={author.avatarUrl} />
           <div className={styles.authorInfo}>
-            <strong>Diogo Martins</strong>
-            <span>Web Developer</span>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
           </div>
         </div>
 
-        <time title="June 3rd at 8:02am" dateTime="2022-06-3 08:02:43">
-          Published at 1h
+        <time
+          title={publishedDataFormatted}
+          dateTime={publishedAt.toISOString()}
+        >
+          {publishedDateRelativeToNew}
         </time>
       </header>
 
       <div className={styles.content}>
-        <p>Fala galeraa 👋</p>
-
-        <p>
-          Acabei de subir mais um projeto no meu portifa. É um projeto que fiz
-          no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀
-        </p>
-
-        <p>
-          <a href="#">jane.design/doctorcare</a>
-        </p>
-
-        <p>
-          <a href="#">#novoprojeto</a> <a href="#">#nlw</a>{" "}
-          <a href="#">#rocketseat</a>
-        </p>
+        {content.map((item) => {
+          if (item.type === "paragraph") {
+            return <p key={item.content}>{item.content}</p>;
+          } else if (item.type === "link") {
+            return (
+              <a href={item.content} key={item.content}>
+                {item.content}
+              </a>
+            );
+          }
+        })}
       </div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleCreateNewComment} className={styles.commentForm}>
         <strong>Leave your feedback</strong>
 
-        <textarea placeholder="Leave a comment" />
+        <textarea
+          name="comment"
+          placeholder="Leave a comment"
+          onChange={handleNewCommentChanged}
+          value={newCommentText}
+          onInvalid={handleNewCommentInvalid}
+          required
+        />
+
         <footer>
-          <button type="submit">Submit</button>
+          <button type="submit" disabled={isNewCommentEmpty}>
+            Submit
+          </button>
         </footer>
       </form>
 
       <div className={styles.commentList}>
-        <Comment />
-        <Comment />
-        <Comment />
-        <Comment />
+        {comments.map((comment) => {
+          return (
+            <Comment
+              key={comment}
+              content={comment}
+              onDeleteComment={onDeleteComment}
+            />
+          );
+        })}
       </div>
     </article>
   );
