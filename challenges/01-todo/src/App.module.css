@@ -1,0 +1,11 @@
+.container {
+  max-width: 47rem;
+  margin: 0 auto;
+  margin-top: -27px;
+  padding: 0 1rem;
+}
+
+.addTaskSection {
+  display: flex;
+  gap: 0.5rem;
+}

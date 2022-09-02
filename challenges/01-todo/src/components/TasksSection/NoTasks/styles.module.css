@@ -1,0 +1,15 @@
+.noTasks {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid #333333;
+  padding: 4rem 0;
+}
+
+.noTasks div h4,
+p {
+  color: var(--gray-300);
+  text-align: center;
+}
